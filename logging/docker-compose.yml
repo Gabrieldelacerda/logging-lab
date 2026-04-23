@@ -21,10 +21,12 @@ services:
   fluent-bit:
     image: grafana/fluent-bit-plugin-loki:latest
     container_name: fluent-bit
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
     volumes:
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./parsers.conf:/fluent-bit/etc/parsers.conf
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     depends_on:
       - loki
     networks:
