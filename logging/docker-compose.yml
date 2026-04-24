@@ -19,7 +19,7 @@ services:
       - monitoring_default
 
   fluent-bit:
-    image: grafana/fluent-bit-plugin-loki:latest
+    image: fluent/fluent-bit:latest
     container_name: fluent-bit
     ports:
       - "24224:24224"
