@@ -1,14 +1,26 @@
 #!/bin/bash
-echo "Cleaning up stale containers"
-docker rm -f loki fluent-bit 2>/dev/null
+set -e
+
+BASE="$HOME/projects"
+
+echo "Starting observability stack"
+docker compose -f "$BASE/observability-stack-lab/monitoring/docker-compose.yml" up -d
 
 echo "Starting logging stack"
-docker compose -f ~/logging-lab/logging/docker-compose.yml up -d
+docker compose -f "$BASE/logging-lab/logging/docker-compose.yml" up -d
 
 echo "Waiting for Loki"
-sleep 15
+for i in {1..20}; do
+    if curl -fsS http://localhost:3100/ready >/dev/null 2>&1; then
+        echo "Loki is ready"
+        break
+    fi
+    sleep 2
+done
 
-echo "Starting nginx"
-cd ~/nginx-multisite-lab && docker compose up -d
+curl -fsS http://localhost:3100/ready >/dev/null
 
-echo "Done"
+echo "Starting Nginx lab"
+docker compose -f "$BASE/nginx-multisite-lab-V2/docker-compose.yml" up -d --build
+
+echo "Logging environment is ready"

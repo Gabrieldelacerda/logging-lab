@@ -1,33 +1,21 @@
 # Logging Lab
 
-Fourth project in a series building a complete DevOps pipeline from scratch. Infrastructure, CI/CD, and metrics were already covered — this one adds logs.
+This project builds a centralized logging pipeline for the Nginx multi-site lab using Fluent Bit, Loki and Grafana.
 
-## What it does
+Nginx sends its container logs through Docker's Fluentd logging driver to Fluent Bit. Fluent Bit parses the Nginx access logs and forwards them to Loki with labels such as HTTP method, path and status code.
 
-Nginx containers ship logs to Fluent Bit via Docker's fluentd driver. Fluent Bit forwards everything to Loki. Grafana queries Loki as a second data source alongside Prometheus and displays the logs with label filtering by status code, path and method.
+The pipeline was validated end to end with real requests to the Nginx container. Logs were successfully parsed and queried in Loki using labels such as `status="200"`.
 
-There's also an alert rule for 5xx errors.
+Grafana connects to Loki through the observability stack. The Loki datasource and the Nginx 5xx alert rule are provisioned automatically from configuration stored in the observability-stack-lab repository.
 
-## Stack
+The alerting flow was also tested with a controlled HTTP 500 response. The event reached Loki with `status="500"` and Grafana activated the 5xx alert successfully.
 
-- **Fluent Bit** — log collection agent
-- **Loki** — log storage and querying
-- **Grafana** — already running from the observability stack, Loki added as a data source
+The main stack is Fluent Bit 5.1.2, Loki 2.9.0, Grafana, Nginx and Docker Compose.
 
-## Running
+To start the complete local environment:
 
-```bash
 bash start.sh
-```
 
-Loki on port 3100, Fluent Bit on 24224.
+The script starts the observability stack, the logging stack and nginx-multisite-lab-V2.
 
-## Note
-
-The fluentd logging driver change lives in nginx-multisite-lab's docker-compose.yml. Both stacks need to be running for logs to flow.
-
-## Related projects
-
-- [Project 1 — nginx-multisite-lab](https://github.com/Gabrieldelacerda/nginx-multisite-lab)
-- [Project 2 — cicd-pipeline-aws](https://github.com/Gabrieldelacerda/cicd-pipeline-aws)
-- [Project 3 — observability-lab](https://github.com/Gabrieldelacerda/observability-lab)
+Loki listens on port 3100 and Fluent Bit receives logs on port 24224.

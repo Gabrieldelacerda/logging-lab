@@ -11,24 +11,26 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - ./loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
     networks:
       - logging
       - monitoring_default
 
   fluent-bit:
-    image: fluent/fluent-bit:latest
+    image: fluent/fluent-bit:5.1.2
     container_name: fluent-bit
     ports:
       - "24224:24224"
       - "24224:24224/udp"
     volumes:
-      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-      - ./parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./parsers.conf:/fluent-bit/etc/parsers.conf:ro
     depends_on:
       - loki
+    restart: unless-stopped
     networks:
       - logging
 
